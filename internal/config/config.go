@@ -45,15 +45,15 @@ func Init(configDir string) (*Config, error) {
 		return nil, err
 	}
 
-	var cfg *Config
-	if err := unmarhal(cfg); err != nil {
+	var conf Config
+	if err := unmarhal(&conf); err != nil {
 		return nil, err
 	}
-	if err := setFromEnv(cfg); err != nil {
+	if err := setFromEnv(&conf); err != nil {
 		return nil, err
 	}
 
-	return cfg, nil
+	return &conf, nil
 }
 
 func parseConfigFile(folder, env string) error {
@@ -85,15 +85,13 @@ func unmarhal(conf *Config) error {
 }
 
 func setFromEnv(conf *Config) error {
-	if err := envconfig.Process("mongo", conf.Mongo); err != nil {
+	if err := envconfig.Process("mongo", &conf.Mongo); err != nil {
 		return err
 	}
-	if err := envconfig.Process("http", conf.Http); err != nil {
+	if err := envconfig.Process("http", &conf.Http); err != nil {
 		return err
 	}
-	if err := envconfig.Process("app", conf.Environment); err != nil {
-		return err
-	}
+	conf.Environment = os.Getenv("APP_ENV")
 	// if err := envconfig.Process("storage", conf.FileStorage); err != nil {
 	// 	return err
 	// }

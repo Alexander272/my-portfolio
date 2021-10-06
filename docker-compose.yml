@@ -1,0 +1,31 @@
+version: "3.4"
+
+services:
+    app:
+        image: portfolio-backend-app
+        container_name: portfolio-backend-app
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - 8080:8080
+        depends_on:
+            - mongodb
+        volumes:
+            - .:/app
+        env_file:
+            - .env
+
+    mongodb:
+        image: mongo:4.4-bionic
+        container_name: mongodb
+        environment:
+            - MONGO_DATA_DIR=/data/db
+            - MONGO_LOG_DIR=/dev/null
+            - MONGODB_DATABASE=portfolio
+            - MONGO_INITDB_ROOT_USERNAME=alex
+            - MONGO_INITDB_ROOT_PASSWORD=password
+        volumes:
+            - ./.data/db:/data/db
+        ports:
+            - 27018:27017
