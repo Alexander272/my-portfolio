@@ -7,8 +7,18 @@ http:
 cache:
   ttl: 3600s
 
+auth:
+  accessTokenTTL: 2h
+  refreshTokenTTL: 720h #30 days
+  verificationCodeLength: 8
+
 mongo:
   databaseName: portfolio
+
+redis:
+  host: localhost
+  port: 6379
+  db: 0
 
 fileStorage:
   url: test.filestorage.com

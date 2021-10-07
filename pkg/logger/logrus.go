@@ -18,11 +18,6 @@ func Init(out io.Writer, env string) {
 }
 
 func Debug(msg ...interface{}) {
-	// file, line string,
-	// logrus.WithFields(logrus.Fields{
-	// 	"file": file,
-	// 	"line": line,
-	// }).Debug(msg...)
 	logrus.Debug(msg...)
 }
 
@@ -39,13 +34,6 @@ func Infof(format string, args ...interface{}) {
 }
 
 func Error(msg ...interface{}) {
-	// pkg, file, function, err string,
-	// logrus.WithFields(logrus.Fields{
-	// 	"package":  pkg,
-	// 	"file":     file,
-	// 	"function": function,
-	// 	"error":    err,
-	// }).Error(msg...)
 	logrus.Error(msg...)
 }
 

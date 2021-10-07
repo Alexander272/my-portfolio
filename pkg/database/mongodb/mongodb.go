@@ -5,17 +5,20 @@ import (
 	"errors"
 	"time"
 
+	"github.com/Alexander272/my-portfolio/pkg/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func NewClient(uri, username, password string) (*mongo.Client, error) {
-	const timeout = 10 * time.Second
+const timeout = 10 * time.Second
 
+func NewClient(uri, username, password string) (*mongo.Client, error) {
 	opts := options.Client().ApplyURI(uri)
 	if username != "" && password != "" {
 		opts.SetAuth(options.Credential{
-			Username: username, Password: password,
+			Username: username,
+			Password: password,
 		})
 	}
 
@@ -32,10 +35,11 @@ func NewClient(uri, username, password string) (*mongo.Client, error) {
 		return nil, err
 	}
 
-	err = client.Ping(context.Background(), nil)
+	err = client.Ping(context.Background(), readpref.Primary())
 	if err != nil {
 		return nil, err
 	}
+	logger.Info("Database connected")
 
 	return client, nil
 }

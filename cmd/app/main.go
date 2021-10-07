@@ -14,10 +14,24 @@ import (
 	"github.com/Alexander272/my-portfolio/internal/repository"
 	"github.com/Alexander272/my-portfolio/internal/server"
 	"github.com/Alexander272/my-portfolio/internal/service"
+	"github.com/Alexander272/my-portfolio/pkg/auth"
 	"github.com/Alexander272/my-portfolio/pkg/database/mongodb"
+	"github.com/Alexander272/my-portfolio/pkg/database/redis"
+	"github.com/Alexander272/my-portfolio/pkg/hash"
 	"github.com/Alexander272/my-portfolio/pkg/logger"
 	"github.com/joho/godotenv"
 )
+
+// @title My Portfolio
+// @version 0.1
+// @description API Server for My Porfolio App
+
+// @host localhost:8080
+// @BasePath /api/v1
+
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 
 func main() {
 	if err := godotenv.Load(); err != nil {
@@ -36,10 +50,32 @@ func main() {
 	}
 	db := mongoClient.Database(conf.Mongo.Name)
 
+	client, err := redis.NewRedisClient(redis.Config{
+		Host:     conf.Redis.Host,
+		Port:     conf.Redis.Port,
+		DB:       conf.Redis.DB,
+		Password: conf.Redis.Password,
+	})
+	if err != nil {
+		logger.Fatalf("failed to initialize redis %s", err.Error())
+	}
+
+	hasher := hash.NewBcryptHasher(conf.Auth.Bcrypt.MinCost, conf.Auth.Bcrypt.DefaultCost, conf.Auth.Bcrypt.MaxCost)
+	tokenManager, err := auth.NewManager(conf.Auth.JWT.Key)
+	if err != nil {
+		logger.Fatalf("failed to initialize token manager: %s", err.Error())
+	}
+
 	// Services, Repos & API Handlers
-	repos := repository.NewRepositories(db)
+	repos := repository.NewRepositories(db, client)
 	services := service.NewServices(service.Deps{
-		Repos: repos,
+		Repos:                  repos,
+		Hasher:                 hasher,
+		TokenManager:           tokenManager,
+		AccessTokenTTL:         conf.Auth.JWT.AccessTokenTTL,
+		RefreshTokenTTL:        conf.Auth.JWT.RefreshTokenTTL,
+		Domain:                 conf.Http.Host,
+		VerificationCodeLength: conf.Auth.VerificationCodeLength,
 	})
 	handlers := delivery.NewHandler(services)
 
