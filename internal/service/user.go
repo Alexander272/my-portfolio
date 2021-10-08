@@ -9,6 +9,7 @@ import (
 	"github.com/Alexander272/my-portfolio/internal/repository"
 	"github.com/Alexander272/my-portfolio/pkg/auth"
 	"github.com/Alexander272/my-portfolio/pkg/hash"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserService struct {
@@ -58,4 +59,17 @@ func (s *UserService) SignUp(ctx context.Context, input SignUpInput) error {
 	}
 
 	return nil
+}
+
+func (s *UserService) GetById(ctx context.Context, userId primitive.ObjectID) (domain.User, error) {
+	return s.repo.GetById(ctx, userId)
+}
+
+func (s *UserService) UpdateById(ctx context.Context, userId primitive.ObjectID, input domain.UserUpdate) error {
+	// todo дабавить сохранения файла аватара
+	return s.repo.UpdateById(ctx, userId, input)
+}
+
+func (s *UserService) RemoveById(ctx context.Context, userId primitive.ObjectID) error {
+	return s.repo.RemoveById(ctx, userId)
 }

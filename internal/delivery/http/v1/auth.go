@@ -32,7 +32,7 @@ type SignUpInput struct {
 // @Accept  json
 // @Produce  json
 // @Param input body SignUpInput true "sign up info"
-// @Success 201 {string} statusResponse
+// @Success 201 {object} statusResponse
 // @Failure 400,404 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Failure default {object} errorResponse

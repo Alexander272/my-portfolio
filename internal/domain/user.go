@@ -12,13 +12,22 @@ type User struct {
 	Email        string             `json:"email" bson:"email"`
 	Password     string             `json:"password" bson:"password"`
 	Role         string             `json:"role" bson:"role"`
-	RegisteredAt time.Time          `json:"registeredAt" bson:"registeredAt"`
-	LastVisitAt  time.Time          `json:"lastVisitAt" bson:"lastVisitAt"`
-	Verification Verification       `json:"verification" bson:"verification"`
+	AvatarUrl    string             `json:"avatarUrl" bson:"avatarUrl"`
+	RegisteredAt time.Time          `json:"-" bson:"registeredAt"`
+	LastVisitAt  time.Time          `json:"-" bson:"lastVisitAt"`
+	Verification Verification       `json:"-" bson:"verification"`
 }
 
 type Verification struct {
 	Code     string    `json:"code" bson:"code"`
 	Verified bool      `json:"verified" bson:"verified"`
 	Expires  time.Time `json:"expires" bson:"expires"`
+}
+
+type UserUpdate struct {
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	Role      string `json:"role"`
+	AvatarUrl string `json:"avatarUrl"`
 }

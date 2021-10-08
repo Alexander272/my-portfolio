@@ -19,6 +19,7 @@ import (
 	"github.com/Alexander272/my-portfolio/pkg/database/redis"
 	"github.com/Alexander272/my-portfolio/pkg/hash"
 	"github.com/Alexander272/my-portfolio/pkg/logger"
+	"github.com/Alexander272/my-portfolio/pkg/storage"
 	"github.com/joho/godotenv"
 )
 
@@ -66,10 +67,16 @@ func main() {
 		logger.Fatalf("failed to initialize token manager: %s", err.Error())
 	}
 
+	storage, err := storage.NewFileStorage(conf.FileStorage.Basket, conf.FileStorage.Endpoint)
+	if err != nil {
+		logger.Fatalf("failed to initialize file storage: %s", err.Error())
+	}
+
 	// Services, Repos & API Handlers
 	repos := repository.NewRepositories(db, client)
 	services := service.NewServices(service.Deps{
 		Repos:                  repos,
+		StorageProvider:        storage,
 		Hasher:                 hasher,
 		TokenManager:           tokenManager,
 		AccessTokenTTL:         conf.Auth.JWT.AccessTokenTTL,

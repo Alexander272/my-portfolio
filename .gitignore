@@ -2,3 +2,4 @@
 config/prod.yml
 tmp
 .data
+book-list-firebase-adminsdk.json

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/Alexander272/my-portfolio/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,7 +21,7 @@ func (h *Handler) userIdentity(c *gin.Context) {
 		return
 	}
 
-	_, err := c.Cookie("session")
+	_, err := c.Cookie(service.CookieName)
 	if err != nil {
 		newErrorResponse(c, http.StatusUnauthorized, "empty auth cookie")
 		return

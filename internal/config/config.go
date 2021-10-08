@@ -15,7 +15,7 @@ type (
 		Redis       RedisConfig
 		Auth        AuthConfig
 		Http        HttpConfig
-		// FileStorage FileStorageConfig
+		FileStorage FileStorageConfig
 		// CacheTTL    time.Duration `mapstructure:"ttl"`
 	}
 
@@ -51,12 +51,10 @@ type (
 		MaxCost     int
 	}
 
-	// FileStorageConfig struct {
-	// 	Endpoint  string
-	// 	Basket    string
-	// 	AccessKey string
-	// 	SecretKey string
-	// }
+	FileStorageConfig struct {
+		Endpoint string
+		Basket   string
+	}
 
 	HttpConfig struct {
 		Host               string        `mapstructure:"host"`
@@ -137,9 +135,9 @@ func setFromEnv(conf *Config) error {
 		return err
 	}
 	conf.Environment = os.Getenv("APP_ENV")
-	// if err := envconfig.Process("storage", conf.FileStorage); err != nil {
-	// 	return err
-	// }
+	if err := envconfig.Process("storage", conf.FileStorage); err != nil {
+		return err
+	}
 
 	return nil
 }

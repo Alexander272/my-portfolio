@@ -43,7 +43,7 @@ func (s *AuthService) SignIn(ctx context.Context, input SignInInput, ua, ip stri
 		return nil, nil, errors.New("invalid credentials")
 	}
 
-	accessToken, err := s.tokenManager.NewJWT(user.Id, user.Email, user.Role, s.accessTokenTTL)
+	accessToken, err := s.tokenManager.NewJWT(user.Id.String(), user.Email, user.Role, s.accessTokenTTL)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -106,7 +106,7 @@ func (s *AuthService) Refresh(token, ua, ip string) (*Token, *http.Cookie, error
 		return nil, nil, errors.New("invalid data")
 	}
 
-	accessToken, err := s.tokenManager.NewJWT(data.UserId, data.Email, data.Role, s.accessTokenTTL)
+	accessToken, err := s.tokenManager.NewJWT(data.UserId.String(), data.Email, data.Role, s.accessTokenTTL)
 	if err != nil {
 		return nil, nil, err
 	}

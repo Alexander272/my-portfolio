@@ -12,8 +12,11 @@ import (
 type Users interface {
 	Create(ctx context.Context, user domain.User) error
 	GetByEmail(ctx context.Context, email string) (domain.User, error)
-	Verify(ctx context.Context, userID primitive.ObjectID, code string) error
-	SetSession(ctx context.Context, userID primitive.ObjectID) error
+	Verify(ctx context.Context, userId primitive.ObjectID, code string) error
+	SetSession(ctx context.Context, userId primitive.ObjectID) error
+	GetById(ctx context.Context, userId primitive.ObjectID) (domain.User, error)
+	UpdateById(ctx context.Context, userId primitive.ObjectID, user domain.UserUpdate) error
+	RemoveById(ctx context.Context, userId primitive.ObjectID) error
 }
 
 type Auth interface {

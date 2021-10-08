@@ -8,11 +8,10 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TokenManager interface {
-	NewJWT(userId primitive.ObjectID, email, role string, ttl time.Duration) (string, error)
+	NewJWT(userId, email, role string, ttl time.Duration) (string, error)
 	Parse(accessToken string) (jwt.MapClaims, error)
 	NewRefreshToken() (string, error)
 }
@@ -28,7 +27,7 @@ func NewManager(jwtKey string) (*Manager, error) {
 	return &Manager{jwtKey: jwtKey}, nil
 }
 
-func (m *Manager) NewJWT(userId primitive.ObjectID, email, role string, ttl time.Duration) (string, error) {
+func (m *Manager) NewJWT(userId, email, role string, ttl time.Duration) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"exp":    time.Now().Add(ttl).Unix(),
 		"iat":    time.Now().Unix(),

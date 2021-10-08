@@ -5,9 +5,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Alexander272/my-portfolio/internal/domain"
 	"github.com/Alexander272/my-portfolio/internal/repository"
 	"github.com/Alexander272/my-portfolio/pkg/auth"
 	"github.com/Alexander272/my-portfolio/pkg/hash"
+	"github.com/Alexander272/my-portfolio/pkg/storage"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const CookieName = "session"
@@ -35,15 +38,22 @@ type Auth interface {
 
 type User interface {
 	SignUp(ctx context.Context, input SignUpInput) error
+	GetById(ctx context.Context, userId primitive.ObjectID) (domain.User, error)
+	UpdateById(ctx context.Context, userId primitive.ObjectID, user domain.UserUpdate) error
+	RemoveById(ctx context.Context, userId primitive.ObjectID) error
 }
+
+type File interface{}
 
 type Services struct {
 	Auth
 	User
+	File
 }
 
 type Deps struct {
 	Repos                  *repository.Repositories
+	StorageProvider        storage.Provider
 	Hasher                 hash.PasswordHasher
 	TokenManager           auth.TokenManager
 	AccessTokenTTL         time.Duration
@@ -56,5 +66,6 @@ func NewServices(deps Deps) *Services {
 	return &Services{
 		Auth: NewAuthService(deps.Repos.Users, deps.Repos.Auth, deps.TokenManager, deps.Hasher, deps.AccessTokenTTL, deps.RefreshTokenTTL, deps.Domain),
 		User: NewUserService(deps.Repos.Users, deps.TokenManager, deps.Hasher),
+		File: NewFileService(deps.StorageProvider),
 	}
 }
