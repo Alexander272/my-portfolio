@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"mime/multipart"
 	"net/http"
 	"time"
 
@@ -43,7 +44,9 @@ type User interface {
 	RemoveById(ctx context.Context, userId primitive.ObjectID) error
 }
 
-type File interface{}
+type File interface {
+	Upload(ctx context.Context, file multipart.File, header *multipart.FileHeader) (string, error)
+}
 
 type Services struct {
 	Auth

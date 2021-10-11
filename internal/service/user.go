@@ -66,7 +66,6 @@ func (s *UserService) GetById(ctx context.Context, userId primitive.ObjectID) (d
 }
 
 func (s *UserService) UpdateById(ctx context.Context, userId primitive.ObjectID, input domain.UserUpdate) error {
-	// todo дабавить сохранения файла аватара
 	return s.repo.UpdateById(ctx, userId, input)
 }
 

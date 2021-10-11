@@ -85,10 +85,14 @@ require (
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
+	github.com/h2non/bimg v1.1.5
 	go.opencensus.io v0.23.0 // indirect
+	golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f // indirect
 	google.golang.org/api v0.58.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20210917145530-b395a37504d4 // indirect
 	google.golang.org/grpc v1.40.0 // indirect
 )
+
+require github.com/chai2010/webp v1.1.0 // indirect

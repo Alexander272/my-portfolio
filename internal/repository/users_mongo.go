@@ -91,6 +91,9 @@ func (r *UsersRepo) UpdateById(ctx context.Context, userId primitive.ObjectID, u
 	if user.Role != "" {
 		update["role"] = user.Role
 	}
+	if user.UserUrl != "" {
+		update["userUrl"] = user.UserUrl
+	}
 	if user.AvatarUrl != "" {
 		update["avatarUrl"] = user.AvatarUrl
 	}

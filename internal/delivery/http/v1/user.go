@@ -4,14 +4,13 @@ import (
 	"mime/multipart"
 	"net/http"
 
-	"github.com/Alexander272/my-portfolio/internal/domain"
 	"github.com/Alexander272/my-portfolio/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (h *Handler) initUserRoutes(api *gin.RouterGroup) {
-	user := api.Group("/user", h.userIdentity)
+	user := api.Group("/user")
 	{
 		user.GET("/:id", h.getUserById)
 		user.PUT("/:id", h.updateUserById)
@@ -54,11 +53,12 @@ func (h *Handler) getUserById(c *gin.Context) {
 }
 
 type UserUpdateInput struct {
-	Name     string         `form:"name" json:"name" binding:"min=2,max=64"`
-	Email    string         `form:"email" json:"email" binding:"email,max=64"`
-	Password string         `form:"password" json:"password" binding:"min=8,max=64"`
-	Role     string         `form:"role" json:"role"`
-	Avatar   multipart.File `json:"avatar"`
+	Name     string                `form:"name" json:"name"`
+	Email    string                `form:"email" json:"email"`
+	Password string                `form:"password" json:"password"`
+	UserUrl  string                `form:"userUrl" json:"userUrl"`
+	Role     string                `form:"role" json:"role"`
+	Avatar   *multipart.FileHeader `form:"avatar" json:"avatar"`
 }
 
 // @Summary Update User By Id
@@ -87,24 +87,27 @@ func (h *Handler) updateUserById(c *gin.Context) {
 		return
 	}
 	var input UserUpdateInput
-	if err := c.BindJSON(&input); err != nil {
+	if err := c.Bind(&input); err != nil {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	logger.Debug(input)
-
-	// file, header, err := c.Request.FormFile("file")
-	// if err != nil {
-	// 	newErrorResponse(c, http.StatusBadRequest, "no file is received")
-	// 	return
-	// }
-
-	err = h.services.User.UpdateById(c, userId, domain.UserUpdate{
-		Name:     input.Name,
-		Email:    input.Email,
-		Password: input.Password,
-		Role:     input.Role,
-	})
+	logger.Debug(userId, " ", input)
+	// todo дабавить сохранения файла аватара
+	// todo разобраться с загрузкой изображений
+	// logger.Debug(*input.Avatar)
+	var url string
+	file, header, err := c.Request.FormFile("avatar")
+	if err == nil {
+		url, err = h.services.File.Upload(c, file, header)
+	}
+	logger.Debug(url)
+	// err = h.services.User.UpdateById(c, userId, domain.UserUpdate{
+	// 	Name:      input.Name,
+	// 	Email:     input.Email,
+	// 	Password:  input.Password,
+	// 	Role:      input.Role,
+	// 	AvatarUrl: url,
+	// })
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

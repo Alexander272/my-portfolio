@@ -67,7 +67,7 @@ func main() {
 		logger.Fatalf("failed to initialize token manager: %s", err.Error())
 	}
 
-	storage, err := storage.NewFileStorage(conf.FileStorage.Basket, conf.FileStorage.Endpoint)
+	storage, err := storage.NewFileStorage(conf.FileStorage.Bucket, conf.FileStorage.Endpoint)
 	if err != nil {
 		logger.Fatalf("failed to initialize file storage: %s", err.Error())
 	}

@@ -53,7 +53,7 @@ type (
 
 	FileStorageConfig struct {
 		Endpoint string
-		Basket   string
+		Bucket   string
 	}
 
 	HttpConfig struct {
@@ -135,7 +135,7 @@ func setFromEnv(conf *Config) error {
 		return err
 	}
 	conf.Environment = os.Getenv("APP_ENV")
-	if err := envconfig.Process("storage", conf.FileStorage); err != nil {
+	if err := envconfig.Process("storage", &conf.FileStorage); err != nil {
 		return err
 	}
 
