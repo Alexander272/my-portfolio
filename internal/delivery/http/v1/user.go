@@ -5,13 +5,12 @@ import (
 	"net/http"
 
 	"github.com/Alexander272/my-portfolio/internal/domain"
-	"github.com/Alexander272/my-portfolio/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (h *Handler) initUserRoutes(api *gin.RouterGroup) {
-	user := api.Group("/user")
+	user := api.Group("/user", h.userIdentity)
 	{
 		user.GET("/:id", h.getUserById)
 		user.PUT("/:id", h.updateUserById)
@@ -54,12 +53,13 @@ func (h *Handler) getUserById(c *gin.Context) {
 }
 
 type UserUpdateInput struct {
-	Name     string                `form:"name" json:"name"`
-	Email    string                `form:"email" json:"email"`
-	Password string                `form:"password" json:"password"`
-	UserUrl  string                `form:"userUrl" json:"userUrl"`
-	Role     string                `form:"role" json:"role"`
-	Avatar   *multipart.FileHeader `form:"avatar" json:"avatar"`
+	Name        string                `form:"name" json:"name"`
+	Email       string                `form:"email" json:"email"`
+	Password    string                `form:"password" json:"password"`
+	UserUrl     string                `form:"userUrl" json:"userUrl"`
+	Role        string                `form:"role" json:"role"`
+	IsDelAvatar bool                  `fomr:"isDelAvatar" json:"isDelAvatar"`
+	Avatar      *multipart.FileHeader `form:"avatar" json:"avatar"`
 }
 
 // @Summary Update User By Id
@@ -92,19 +92,24 @@ func (h *Handler) updateUserById(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	logger.Debug(userId, " ", input)
-	// todo дабавить сохранения файла аватара
-	// todo разобраться с загрузкой изображений
-	// logger.Debug(*input.Avatar)
+
 	var avatar *domain.File
-	file, header, err := c.Request.FormFile("avatar")
-	if err == nil {
-		avatar, err = h.services.File.Upload(c, file, header, "avatar", "avatar")
-		if err != nil {
+	if input.IsDelAvatar {
+		if err := h.services.File.Remove(c, id+"/avatar", "avatar"); err != nil {
 			newErrorResponse(c, http.StatusBadRequest, err.Error())
 			return
 		}
+	} else {
+		file, header, err := c.Request.FormFile("avatar")
+		if err == nil {
+			avatar, err = h.services.File.Upload(c, file, header, id+"/avatar", "avatar")
+			if err != nil {
+				newErrorResponse(c, http.StatusBadRequest, err.Error())
+				return
+			}
+		}
 	}
+
 	err = h.services.User.UpdateById(c, userId, domain.UserUpdate{
 		Name:     input.Name,
 		Email:    input.Email,
@@ -145,6 +150,10 @@ func (h *Handler) removeUserById(c *gin.Context) {
 		return
 	}
 
+	if err := h.services.File.Remove(c, id, ""); err != nil {
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 	if err = h.services.User.RemoveById(c, userId); err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

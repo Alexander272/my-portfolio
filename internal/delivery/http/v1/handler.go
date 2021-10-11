@@ -20,6 +20,7 @@ func (h *Handler) Init(api *gin.RouterGroup) {
 	{
 		h.initAuthRoutes(v1)
 		h.initUserRoutes(v1)
+		h.initProjectsRoutes(v1)
 		v1.GET("/", h.notImplemented)
 	}
 }

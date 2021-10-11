@@ -86,7 +86,26 @@ func (fs *FileStorage) Upload(ctx context.Context, file multipart.File, header *
 }
 
 func (fs *FileStorage) Remove(ctx context.Context, path, filename string) error {
-	return fs.storage.Object(filepath.Join(path, filename+".webp")).Delete(ctx)
+	if filename != "" {
+		return fs.storage.Object(filepath.Join(path, filename+".webp")).Delete(ctx)
+	}
+
+	objects := fs.storage.Objects(ctx, &storage.Query{Prefix: path})
+	obj, err := objects.Next()
+	if err != nil {
+		return err
+	}
+	for obj != nil {
+		err = fs.storage.Object(obj.Name).Delete(ctx)
+		if err != nil {
+			return err
+		}
+		obj, err = objects.Next()
+		if err != nil && err.Error() != "no more items in iterator" {
+			return err
+		}
+	}
+	return nil
 }
 
 func (fs *FileStorage) imageCompressing(buffer []byte, quality float32, contentType string) ([]byte, error) {
@@ -103,6 +122,8 @@ func (fs *FileStorage) imageCompressing(buffer []byte, quality float32, contentT
 		if err != nil {
 			return nil, err
 		}
+	case "image/webp":
+		return buffer, nil
 	}
 
 	var out bytes.Buffer
