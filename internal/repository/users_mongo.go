@@ -7,6 +7,7 @@ import (
 
 	"github.com/Alexander272/my-portfolio/internal/domain"
 	"github.com/Alexander272/my-portfolio/pkg/database/mongodb"
+	"github.com/Alexander272/my-portfolio/pkg/logger"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -94,9 +95,10 @@ func (r *UsersRepo) UpdateById(ctx context.Context, userId primitive.ObjectID, u
 	if user.UserUrl != "" {
 		update["userUrl"] = user.UserUrl
 	}
-	if user.AvatarUrl != "" {
-		update["avatarUrl"] = user.AvatarUrl
+	if user.Avatar.Url != "" {
+		update["avatar"] = user.Avatar
 	}
+	logger.Debug(user)
 
 	_, err := r.db.UpdateOne(ctx, bson.M{"_id": userId}, bson.M{"$set": update})
 	return err

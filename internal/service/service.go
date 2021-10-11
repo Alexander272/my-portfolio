@@ -45,7 +45,8 @@ type User interface {
 }
 
 type File interface {
-	Upload(ctx context.Context, file multipart.File, header *multipart.FileHeader) (string, error)
+	Upload(ctx context.Context, file multipart.File, header *multipart.FileHeader, path, filename string) (*domain.File, error)
+	Remove(ctx context.Context, path, filename string) error
 }
 
 type Services struct {

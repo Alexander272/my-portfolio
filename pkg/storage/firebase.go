@@ -15,8 +15,8 @@ import (
 
 	"cloud.google.com/go/storage"
 	firebase "firebase.google.com/go/v4"
-	"github.com/Alexander272/my-portfolio/pkg/logger"
 	"github.com/chai2010/webp"
+	"github.com/google/uuid"
 	"google.golang.org/api/option"
 )
 
@@ -50,16 +50,15 @@ func NewFileStorage(bucketName, pathToCredentials string) (*FileStorage, error) 
 	}, nil
 }
 
-func (fs *FileStorage) Upload(ctx context.Context, file multipart.File, header *multipart.FileHeader, path, name string) (string, error) {
+func (fs *FileStorage) Upload(ctx context.Context, file multipart.File, header *multipart.FileHeader, path, name string) (*File, error) {
 	fileBytes, err := io.ReadAll(file)
-	logger.Debug(header.Header)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	newFile, err := fs.imageCompressing(fileBytes, 85, header.Header.Get("Content-Type"))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	var filename string
 	if name != "" {
@@ -67,18 +66,27 @@ func (fs *FileStorage) Upload(ctx context.Context, file multipart.File, header *
 	} else {
 		filename = strings.Split(header.Filename, ".")[0] + fmt.Sprintf("_%d.webp", time.Now().Unix())
 	}
+	id := uuid.New()
 
 	wc := fs.storage.Object(filepath.Join(path, filename)).NewWriter(ctx)
+	wc.ObjectAttrs.Metadata = map[string]string{"firebaseStorageDownloadTokens": id.String()}
+	wc.ObjectAttrs.MediaLink = fmt.Sprintf("https://storage.cloud.google.com/%s.appspot.com/%s", fs.bucketName, filepath.Join(path, filename))
 	_, err = io.Copy(wc, bytes.NewReader(newFile))
 	if err != nil {
-		return "", err
-
+		return nil, err
 	}
 	if err := wc.Close(); err != nil {
-		return "", err
+		return nil, err
+	}
+	if err := fs.storage.Object(filepath.Join(path, filename)).ACL().Set(ctx, storage.AllUsers, storage.RoleReader); err != nil {
+		return nil, err
 	}
 
-	return fmt.Sprintf("https://storage.cloud.google.com/%s.appspot.com/%s", fs.bucketName, filepath.Join(path, filename)), nil
+	return &File{Name: filename, Url: wc.MediaLink}, nil
+}
+
+func (fs *FileStorage) Remove(ctx context.Context, path, filename string) error {
+	return fs.storage.Object(filepath.Join(path, filename+".webp")).Delete(ctx)
 }
 
 func (fs *FileStorage) imageCompressing(buffer []byte, quality float32, contentType string) ([]byte, error) {

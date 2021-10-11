@@ -4,6 +4,7 @@ import (
 	"mime/multipart"
 	"net/http"
 
+	"github.com/Alexander272/my-portfolio/internal/domain"
 	"github.com/Alexander272/my-portfolio/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -95,19 +96,22 @@ func (h *Handler) updateUserById(c *gin.Context) {
 	// todo дабавить сохранения файла аватара
 	// todo разобраться с загрузкой изображений
 	// logger.Debug(*input.Avatar)
-	var url string
+	var avatar *domain.File
 	file, header, err := c.Request.FormFile("avatar")
 	if err == nil {
-		url, err = h.services.File.Upload(c, file, header)
+		avatar, err = h.services.File.Upload(c, file, header, "avatar", "avatar")
+		if err != nil {
+			newErrorResponse(c, http.StatusBadRequest, err.Error())
+			return
+		}
 	}
-	logger.Debug(url)
-	// err = h.services.User.UpdateById(c, userId, domain.UserUpdate{
-	// 	Name:      input.Name,
-	// 	Email:     input.Email,
-	// 	Password:  input.Password,
-	// 	Role:      input.Role,
-	// 	AvatarUrl: url,
-	// })
+	err = h.services.User.UpdateById(c, userId, domain.UserUpdate{
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: input.Password,
+		Role:     input.Role,
+		Avatar:   *avatar,
+	})
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

@@ -13,7 +13,7 @@ type User struct {
 	Email        string             `json:"email" bson:"email"`
 	Password     string             `json:"password" bson:"password"`
 	Role         string             `json:"role" bson:"role"`
-	AvatarUrl    string             `json:"avatarUrl" bson:"avatarUrl"`
+	Avatar       File               `json:"avatar" bson:"avatar"`
 	RegisteredAt time.Time          `json:"-" bson:"registeredAt"`
 	LastVisitAt  time.Time          `json:"-" bson:"lastVisitAt"`
 	Verification Verification       `json:"-" bson:"verification"`
@@ -26,10 +26,10 @@ type Verification struct {
 }
 
 type UserUpdate struct {
-	Name      string `json:"name"`
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-	UserUrl   string `json:"userUrl"`
-	Role      string `json:"role"`
-	AvatarUrl string `json:"avatarUrl"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	UserUrl  string `json:"userUrl"`
+	Role     string `json:"role"`
+	Avatar   File   `json:"avatar"`
 }
