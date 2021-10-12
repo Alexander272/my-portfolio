@@ -25,6 +25,8 @@ func NewUsersRepo(db *mongo.Database) *UsersRepo {
 
 func (r *UsersRepo) Create(ctx context.Context, user domain.User) error {
 	_, err := r.db.InsertOne(ctx, user)
+	logger.Debug(err)
+	// todo IsDuplicate как-то криво работает
 	if mongodb.IsDuplicate(err) {
 		return domain.ErrUserAlreadyExists
 	}
@@ -107,4 +109,20 @@ func (r *UsersRepo) UpdateById(ctx context.Context, userId primitive.ObjectID, u
 func (r *UsersRepo) RemoveById(ctx context.Context, userId primitive.ObjectID) error {
 	_, err := r.db.DeleteOne(ctx, bson.M{"_id": userId})
 	return err
+}
+
+func (r *UsersRepo) GetAllUsers(ctx context.Context) ([]domain.User, error) {
+	cursor, err := r.db.Find(ctx, bson.M{})
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	var users []domain.User
+	if err := cursor.All(ctx, &users); err != nil {
+		return nil, err
+	}
+	return users, nil
 }

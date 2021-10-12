@@ -17,6 +17,7 @@ type Users interface {
 	GetById(ctx context.Context, userId primitive.ObjectID) (domain.User, error)
 	UpdateById(ctx context.Context, userId primitive.ObjectID, user domain.UserUpdate) error
 	RemoveById(ctx context.Context, userId primitive.ObjectID) error
+	GetAllUsers(ctx context.Context) ([]domain.User, error)
 }
 
 type Auth interface {
@@ -25,14 +26,28 @@ type Auth interface {
 	RemoveSession(token string) error
 }
 
+type Projects interface {
+	GetProjects(ctx context.Context, userId primitive.ObjectID) ([]domain.ProjectMin, error)
+	CreateProject(ctx context.Context, project domain.ProjectInput) error
+	GetProjectById(ctx context.Context, projectId primitive.ObjectID) (*domain.Project, error)
+	UpdateProject(ctx context.Context, projectId primitive.ObjectID, project domain.SelfProject) error
+	RemoveProject(ctx context.Context, projectId primitive.ObjectID) error
+
+	GetDrafts(ctx context.Context, userId primitive.ObjectID) ([]domain.SelfProjectMin, error)
+	GetSelfProjectById(ctx context.Context, projectId, userId primitive.ObjectID) (*domain.SelfProject, error)
+	GetSelfProjects(ctx context.Context, userId primitive.ObjectID) ([]domain.SelfProjectMin, error)
+}
+
 type Repositories struct {
 	Users
 	Auth
+	Projects
 }
 
 func NewRepositories(db *mongo.Database, client *redis.Client) *Repositories {
 	return &Repositories{
-		Auth:  NewAuthRepo(client),
-		Users: NewUsersRepo(db),
+		Auth:     NewAuthRepo(client),
+		Users:    NewUsersRepo(db),
+		Projects: NewProjectsRepo(db),
 	}
 }

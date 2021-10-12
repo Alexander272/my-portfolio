@@ -92,7 +92,7 @@ func (fs *FileStorage) Remove(ctx context.Context, path, filename string) error 
 
 	objects := fs.storage.Objects(ctx, &storage.Query{Prefix: path})
 	obj, err := objects.Next()
-	if err != nil {
+	if err != nil && err.Error() != "no more items in iterator" {
 		return err
 	}
 	for obj != nil {

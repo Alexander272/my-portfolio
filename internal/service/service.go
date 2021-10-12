@@ -42,6 +42,7 @@ type User interface {
 	GetById(ctx context.Context, userId primitive.ObjectID) (domain.User, error)
 	UpdateById(ctx context.Context, userId primitive.ObjectID, user domain.UserUpdate) error
 	RemoveById(ctx context.Context, userId primitive.ObjectID) error
+	GetAllUsers(ctx context.Context) ([]domain.User, error)
 }
 
 type File interface {

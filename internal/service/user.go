@@ -22,6 +22,7 @@ func NewUserService(repo repository.Users, tokenManager auth.TokenManager, hashe
 	return &UserService{
 		repo:         repo,
 		tokenManager: tokenManager,
+		hasher:       hasher,
 	}
 }
 
@@ -71,4 +72,8 @@ func (s *UserService) UpdateById(ctx context.Context, userId primitive.ObjectID,
 
 func (s *UserService) RemoveById(ctx context.Context, userId primitive.ObjectID) error {
 	return s.repo.RemoveById(ctx, userId)
+}
+
+func (s *UserService) GetAllUsers(ctx context.Context) ([]domain.User, error) {
+	return s.repo.GetAllUsers(ctx)
 }

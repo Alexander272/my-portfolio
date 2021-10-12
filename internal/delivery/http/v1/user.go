@@ -10,12 +10,23 @@ import (
 )
 
 func (h *Handler) initUserRoutes(api *gin.RouterGroup) {
-	user := api.Group("/user", h.userIdentity)
+	user := api.Group("/user")
 	{
+		user.GET("/all", h.getAllUsers)
 		user.GET("/:id", h.getUserById)
 		user.PUT("/:id", h.updateUserById)
 		user.DELETE("/:id", h.removeUserById)
 	}
+}
+
+func (h *Handler) getAllUsers(c *gin.Context) {
+	users, err := h.services.User.GetAllUsers(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
 }
 
 // @Summary Get User By Id
